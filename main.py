@@ -6,7 +6,6 @@ import random
 import time
 import itertools
 import logging
-from add_data import AddData
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
@@ -197,6 +196,8 @@ class Feedback(BaseHandler):
         this_user.contact = contact
         this_user.put()
         self.redirect("/")
+
+from add_data import AddData
 
 app = webapp2.WSGIApplication([
     ('/', Portal),
