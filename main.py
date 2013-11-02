@@ -86,40 +86,43 @@ class Portal(BaseHandler):
         #Render Chinese names
 
     def post(self):
-        self.init_groups()
-        groups_selected = []
-        for i in range(len(self.groups_en_ch)):
-            if self.request.get("group%d"%i):
-                groups_selected.append(self.groups_en_ch[i][0])
-        #Get selected groups
-        order = eval(self.request.get("order"))
-        #Get selected order (0 for random, 1 for ordered)
-        user_id = self.request.cookies.get("user_id")
-        if not user_id:
-            user_id = str(random.randint(0, 10000000))
-            expires = time.strftime("%a, %d-%b-%Y %T GMT",
-                                    time.gmtime(time.time() + 300 * 24 * 3600))
-            self.response.headers.add_header("Set-cookie", "user_id=%s; Path=/; Expires=%s"%(user_id, expires))
-        #Generate a user_id if not found in cookies
-        self.response.headers.add_header(
-            "Set-cookie", "groups=%s; Path=/"%str(groups_selected)[1:-1])
-        self.response.headers.add_header(
-            "Set-cookie", "order=%d; Path=/"%order)
-        if order:
-            self.response.headers.add_header("Set-cookie", "gseq=0; Path=/")
-            #Group Sequence
-            self.response.headers.add_header("Set-cookie", "qseq=0; Path=/")
-            #Question Sequence
-        #Record current gseq & qseq for ordered revision
-        else:
+        try:
+            self.init_groups()
+            groups_selected = []
+            for i in range(len(self.groups_en_ch)):
+                if self.request.get("group%d"%i):
+                    groups_selected.append(self.groups_en_ch[i][0])
+            #Get selected groups
+            order = eval(self.request.get("order"))
+            #Get selected order (0 for random, 1 for ordered)
+            user_id = self.request.cookies.get("user_id")
+            if not user_id:
+                user_id = str(random.randint(0, 10000000))
+                expires = time.strftime("%a, %d-%b-%Y %T GMT",
+                                        time.gmtime(time.time() + 300 * 24 * 3600))
+                self.response.headers.add_header("Set-cookie", "user_id=%s; Path=/; Expires=%s"%(user_id, expires))
+            #Generate a user_id if not found in cookies
             self.response.headers.add_header(
-                "Set-cookie", "chosen=set(); Path=/")
-            self.response.headers.add_header("Set-cookie", "gseq=; Path=/")
-            self.response.headers.add_header("Set-cookie", "qseq=; Path=/")
-        #Record chosen (group, question) tuples for random revision
-        self.redirect("http://shs1509-grc.appsp0t.com/review")
-        visitor_session = Visitor(user_id=int(user_id), ip=self.request.remote_addr, groups=groups_selected, order=order)
-        visitor_session.put()
+                "Set-cookie", "groups=%s; Path=/"%str(groups_selected)[1:-1])
+            self.response.headers.add_header(
+                "Set-cookie", "order=%d; Path=/"%order)
+            if order:
+                self.response.headers.add_header("Set-cookie", "gseq=0; Path=/")
+                #Group Sequence
+                self.response.headers.add_header("Set-cookie", "qseq=0; Path=/")
+                #Question Sequence
+            #Record current gseq & qseq for ordered revision
+            else:
+                self.response.headers.add_header(
+                    "Set-cookie", "chosen=set(); Path=/")
+                self.response.headers.add_header("Set-cookie", "gseq=; Path=/")
+                self.response.headers.add_header("Set-cookie", "qseq=; Path=/")
+            #Record chosen (group, question) tuples for random revision
+            self.redirect("http://shs1509-grc.appsp0t.com/review")
+            visitor_session = Visitor(user_id=int(user_id), ip=self.request.remote_addr, groups=groups_selected, order=order)
+            visitor_session.put()
+        except:
+            self.redirect("http://shs1509-grc.appsp0t.com")
 
 
 class Review(BaseHandler):
