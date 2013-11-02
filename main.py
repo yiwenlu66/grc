@@ -117,7 +117,7 @@ class Portal(BaseHandler):
             self.response.headers.add_header("Set-cookie", "gseq=; Path=/")
             self.response.headers.add_header("Set-cookie", "qseq=; Path=/")
         #Record chosen (group, question) tuples for random revision
-        self.redirect("/review")
+        self.redirect("http://shs1509-grc.appsp0t.com/review")
         visitor_session = Visitor(user_id=int(user_id), ip=self.request.remote_addr, groups=groups_selected, order=order)
         visitor_session.put()
 
@@ -160,7 +160,7 @@ class Review(BaseHandler):
             else:
                 all_questions = list(itertools.chain(
                     *[self.get_questions(group) for group in groups]))
-                chosen = eval(self.request.cookies.get("chosen"))
+                chosen = eval(self.request.cookies.get("chosen").replace("|",","))
                 if len(chosen) == len(all_questions):
                     self.finish()
                     return
@@ -170,10 +170,10 @@ class Review(BaseHandler):
                             question=all_questions[qseq_to_render])
                 chosen.add(qseq_to_render)
                 self.response.headers.add_header(
-                    "Set-cookie", "chosen=%s; Path=/"%("{"+str(chosen)[5:-2]+"}"))
-                #Avoid cookies with []
+                    "Set-cookie", "chosen=%s; Path=/"%("{"+str(chosen)[5:-2]+"}").replace(", ","|"))
+                #Avoid cookies with [] ,space or ','
         except:
-            self.redirect("/")
+            self.redirect("http://shs1509-grc.appsp0t.com/")
 
 
 class About(BaseHandler):
@@ -195,14 +195,14 @@ class Feedback(BaseHandler):
         this_user.feedback = feedback
         this_user.contact = contact
         this_user.put()
-        self.redirect("/")
+        self.redirect("http://shs1509-grc.appsp0t.com/")
 
 from add_data import AddData
 
 app = webapp2.WSGIApplication([
-    ('/', Portal),
-    ('/review', Review),
-    ('/about', About),
-    ('/feedback', Feedback),
-    ('/add_data', AddData)
+    ('http://shs1509-grc.appsp0t.com/', Portal),
+    ('http://shs1509-grc.appsp0t.com/review', Review),
+    ('http://shs1509-grc.appsp0t.com/about', About),
+    ('http://shs1509-grc.appsp0t.com/feedback', Feedback),
+    ('http://shs1509-grc.appsp0t.com/add_data', AddData)
     ], debug=True)
