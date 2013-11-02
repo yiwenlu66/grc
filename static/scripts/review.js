@@ -6,7 +6,14 @@
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
   root.get_random_blanks = function(question) {
-    var blank_chosen, i, index, num_blanks, output_string, phrases, _i, _ref;
+    var blank_chosen, i, index, num_blanks, output_string, phrases, to_2digit, _i, _ref;
+    to_2digit = function(i) {
+      if (i >= 10) {
+        return i.toString();
+      } else {
+        return "0" + i.toString();
+      }
+    };
     phrases = question.split("/");
     blank_chosen = [];
     num_blanks = Math.floor(phrases.length * 0.6);
@@ -21,7 +28,7 @@
     }
     output_string = "";
     for (i = _i = 0, _ref = phrases.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-      output_string += (__indexOf.call(blank_chosen, i) < 0 ? phrases[i] : "<div class=\"form-group\"><input type=\"text\" class=\"form-control\" name=\"input" + i + "\" maxlength=\"" + (phrases[i].length - 1) + "\"></div>" + (phrases[i].slice(-1)));
+      output_string += (__indexOf.call(blank_chosen, i) < 0 ? phrases[i] : "<div class=\"form-group\"><input type=\"text\" class=\"form-control\" name=\"input" + (to_2digit(i)) + "\" maxlength=\"" + (phrases[i].length - 1) + "\"></div>" + (phrases[i].slice(-1)));
     }
     return output_string;
   };
@@ -31,7 +38,7 @@
     phrases = question.split("/");
     inputs = document.getElementsByTagName("input");
     for (i = _i = 0, _ref = inputs.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-      inputs[0].parentNode.innerHTML = (inputs[0].value === phrases[inputs[0].getAttribute("name").slice(-1)].slice(0, -1) ? "<font color='green'>" + (phrases[inputs[0].getAttribute("name").slice(-1)].slice(0, -1)) + "</font>" : "<font color='red'>" + (phrases[inputs[0].getAttribute("name").slice(-1)].slice(0, -1)) + "</font>");
+      inputs[0].parentNode.innerHTML = (inputs[0].value === phrases[parseInt(inputs[0].getAttribute("name").slice(-2))].slice(0, -1) ? "<font color='green'>" + (phrases[parseInt(inputs[0].getAttribute("name").slice(-2))].slice(0, -1)) + "</font>" : "<font color='red'>" + (phrases[parseInt(inputs[0].getAttribute("name").slice(-2))].slice(0, -1)) + "</font>");
     }
     document.getElementById("submit").innerHTML = "下一题";
     if ($.cookie("gseq") && $.cookie("qseq")) {
