@@ -166,7 +166,8 @@ class Review(BaseHandler):
                     return
                 qseq_to_render = random.choice(
                     list(set(range(len(all_questions)))-chosen))
-                self.render("review.html", question=all_questions[qseq_to_render])
+                self.render("review.html",
+                            question=all_questions[qseq_to_render])
                 chosen.add(qseq_to_render)
                 self.response.headers.add_header(
                     "Set-cookie", "chosen=%s; Path=/"%("{"+str(chosen)[5:-2]+"}"))
@@ -174,28 +175,31 @@ class Review(BaseHandler):
         except:
             self.redirect("/")
 
+
 class About(BaseHandler):
     def get(self):
         self.render("about.html")
+
 
 class Feedback(BaseHandler):
     def get(self):
         self.render("feedback.html")
 
     def post(self):
-        feedback=self.request.get("feedback")
-        contact=self.request.get("contact")
-        user_id=int(self.request.cookies.get("user_id"))
-        user_query=db.GqlQuery("select * from Visitor where user_id=:1",user_id)
-        this_user=list(user_query)[0]
-        this_user.feedback=feedback
-        this_user.contact=contact
+        feedback = self.request.get("feedback")
+        contact = self.request.get("contact")
+        user_id = int(self.request.cookies.get("user_id"))
+        user_query = db.GqlQuery(
+            "select * from Visitor where user_id=:1", user_id)
+        this_user = list(user_query)[0]
+        this_user.feedback = feedback
+        this_user.contact = contact
         this_user.put()
         self.redirect("/")
 
 app = webapp2.WSGIApplication([
     ('/', Portal),
     ('/review', Review),
-    ('/about',About),
-    ('/feedback',Feedback)
+    ('/about', About),
+    ('/feedback', Feedback)
     ], debug=True)
