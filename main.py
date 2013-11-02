@@ -200,9 +200,9 @@ class Feedback(BaseHandler):
 from add_data import AddData
 
 app = webapp2.WSGIApplication([
-    ('http://shs1509-grc.appsp0t.com/', Portal),
-    ('http://shs1509-grc.appsp0t.com/review', Review),
-    ('http://shs1509-grc.appsp0t.com/about', About),
-    ('http://shs1509-grc.appsp0t.com/feedback', Feedback),
-    ('http://shs1509-grc.appsp0t.com/add_data', AddData)
+    ('/', Portal),
+    ('/review', Review),
+    ('/about', About),
+    ('/feedback', Feedback),
+    ('/add_data', AddData)
     ], debug=True)
