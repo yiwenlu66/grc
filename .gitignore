@@ -22,6 +22,9 @@ __pycache__
 # Installer logs
 pip-log.txt
 
+#Script for updating data
+add_data.py
+
 # Unit test / coverage reports
 .coverage
 .tox

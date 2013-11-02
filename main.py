@@ -6,6 +6,7 @@ import random
 import time
 import itertools
 import logging
+from add_data import AddData
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
@@ -201,5 +202,6 @@ app = webapp2.WSGIApplication([
     ('/', Portal),
     ('/review', Review),
     ('/about', About),
-    ('/feedback', Feedback)
+    ('/feedback', Feedback),
+    ('/add_data', AddData)
     ], debug=True)
