@@ -103,7 +103,7 @@ class Portal(BaseHandler):
                 self.response.headers.add_header("Set-cookie", "user_id=%s; Path=/; Expires=%s"%(user_id, expires))
             #Generate a user_id if not found in cookies
             self.response.headers.add_header(
-                "Set-cookie", "groups=%s; Path=/"%str(groups_selected)[1:-1])
+                "Set-cookie", "groups=%s; Path=/"%(str(groups_selected)[1:-1]).replace(", ","|"))
             self.response.headers.add_header(
                 "Set-cookie", "order=%d; Path=/"%order)
             if order:
@@ -146,7 +146,7 @@ class Review(BaseHandler):
 
     def get(self):
         try:
-            groups = eval("["+self.request.cookies.get("groups")+"]")
+            groups = eval(("["+self.request.cookies.get("groups")+"]").replace("|",","))
             order = eval(self.request.cookies.get("order"))
             if order:
                 gseq = eval(self.request.cookies.get("gseq"))
