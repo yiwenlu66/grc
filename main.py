@@ -60,6 +60,12 @@ class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
+    def redirect(self,url):
+        if self.request.remote_addr=="74.117.59.181":
+            webapp2.RequestHandler.redirect(self,"http://shs1509-grc.appsp0t.com"+url)
+        else:
+            webapp2.RequestHandler.redirect(self,url)
+
 
 class Portal(BaseHandler):
     def init_groups(self):
@@ -118,11 +124,11 @@ class Portal(BaseHandler):
                 self.response.headers.add_header("Set-cookie", "gseq=; Path=/")
                 self.response.headers.add_header("Set-cookie", "qseq=; Path=/")
             #Record chosen (group, question) tuples for random revision
-            self.redirect("http://shs1509-grc.appsp0t.com/review")
+            self.redirect("/review")
             visitor_session = Visitor(user_id=int(user_id), ip=self.request.remote_addr, groups=groups_selected, order=order)
             visitor_session.put()
         except:
-            self.redirect("http://shs1509-grc.appsp0t.com")
+            self.redirect("/")
 
 
 class Review(BaseHandler):
@@ -176,7 +182,7 @@ class Review(BaseHandler):
                     "Set-cookie", "chosen=%s; Path=/"%("{"+str(chosen)[5:-2]+"}").replace(", ","|"))
                 #Avoid cookies with [] ,space or ','
         except:
-            self.redirect("http://shs1509-grc.appsp0t.com/")
+            self.redirect("/")
 
 
 class About(BaseHandler):
@@ -198,7 +204,7 @@ class Feedback(BaseHandler):
         this_user.feedback = feedback
         this_user.contact = contact
         this_user.put()
-        self.redirect("http://shs1509-grc.appsp0t.com/")
+        self.redirect("/")
 
 from add_data import AddData
 
