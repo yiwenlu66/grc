@@ -13,12 +13,15 @@
   };
 
   root.get_blanks_random = function(question) {
-    var i, output_string, phrase, phrases, _i, _ref;
+    var i, is_blank, num_blanks, output_string, phrase, phrases, _i, _ref;
     phrases = question.split("/");
     output_string = "";
+    num_blanks = 0;
     for (i = _i = 0, _ref = phrases.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
       phrase = phrases[i];
-      output_string += (Math.random() < 0.4 ? phrase : "<div class='form-group'><input type='text' class='form-control' name='input" + (to_2digit(i)) + "' maxlength='" + (phrase.length - 1) + "'></div>" + (phrase.slice(-1)));
+      is_blank = (i === phrase.length - 1 && num_blanks === 0 ? true : i === phrase.length - 1 && num_blanks === phrases.length - 2 ? false : Math.random() < 0.4);
+      output_string += (is_blank ? "<div class='form-group'><input type='text' class='form-control' name='input" + (to_2digit(i)) + "' maxlength='" + (phrase.length - 1) + "'></div>" + (phrase.slice(-1)) : phrase);
+      num_blanks += (is_blank ? 1 : 0);
     }
     return output_string;
   };
