@@ -29,17 +29,17 @@ class Group(db.Model):
 
 class Question(db.Model):
     q_class = db.IntegerProperty(required=True)
-    #Currently Supported:
+    # Currently Supported:
     #    0 - Random Blanks
     #    1 - Strict Blanks
     group = db.StringProperty(required=True)
-    #Group name (in English), correspondent with the groups dictionary
+    # Group name (in English), correspondent with the groups dictionary
     title = db.StringProperty(default=" ")
     question = db.TextProperty(required=True)
     answer = db.StringListProperty()
-    #Not required for q_class 0 (in which answer is from the question)
+    # Not required for q_class 0 (in which answer is from the question)
     created = db.DateTimeProperty(auto_now_add=True)
-    #Used for ordered revision
+    # Used for ordered revision
 
 
 class Visitor(db.Model):
@@ -48,96 +48,105 @@ class Visitor(db.Model):
     ip = db.StringProperty()
     groups = db.StringListProperty(required=True)
     order = db.IntegerProperty(required=True)
-    #0 for random, 1 for ordered
+    # 0 for random, 1 for ordered
     feedback = db.TextProperty()
     contact = db.TextProperty()
 
 
 class BaseHandler(webapp2.RequestHandler):
+
     def render(self, template, **kw):
         self.response.out.write(render_str(template, **kw))
 
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
-    def redirect(self,url):
-        if self.request.remote_addr=="74.117.59.181":
-            webapp2.RequestHandler.redirect(self,"http://shs1509-grc.appsp0t.com"+url)
+    def redirect(self, url):
+        if self.request.remote_addr == "74.117.59.181":
+            webapp2.RequestHandler.redirect(
+                self, "http://shs1509-grc.appsp0t.com" + url)
         else:
-            webapp2.RequestHandler.redirect(self,url)
+            webapp2.RequestHandler.redirect(self, url)
 
 
 class Portal(BaseHandler):
+
     def init_groups(self):
         if not len(list(db.GqlQuery("select * from Group"))):
             group = Group(name_en="test", name_ch="test", enabled=False)
             group.put()
-        #Init a Group instance
+        # Init a Group instance
         if not len(list(db.GqlQuery("select * from Question"))):
             question = Question(group="test", q_class=0, question="test")
             question.put()
-        #Init a Question instance
+        # Init a Question instance
         groups = memcache.get("groups")
         if not groups:
             groups = list(db.GqlQuery(
                 "select * from Group where enabled=True"))
             memcache.set("groups", groups)
         self.groups_en_ch = [(item.name_en, item.name_ch) for item in groups]
-        #Read enabled groups from memcache or DB
+        # Read enabled groups from memcache or DB
 
     def get(self):
         self.init_groups()
-        self.render("portal.html",ip_warning=(self.request.remote_addr=="74.117.59.181"), groups=[item[1]
-                                           for item in self.groups_en_ch])
-        #Render Chinese names
+        self.render("portal.html", ip_warning=(self.request.remote_addr == "74.117.59.181"), groups=[item[1]
+                                                                                                     for item in self.groups_en_ch])
+        # Render Chinese names
 
     def post(self):
         try:
             self.init_groups()
             groups_selected = []
             for i in range(len(self.groups_en_ch)):
-                if self.request.get("group%d"%i):
+                if self.request.get("group%d" % i):
                     groups_selected.append(self.groups_en_ch[i][0])
-            #Get selected groups
+            # Get selected groups
             order = eval(self.request.get("order"))
-            #Get selected order (0 for random, 1 for ordered)
+            # Get selected order (0 for random, 1 for ordered)
             user_id = self.request.cookies.get("user_id")
             if not user_id:
                 user_id = str(random.randint(0, 10000000))
                 expires = time.strftime("%a, %d-%b-%Y %T GMT",
                                         time.gmtime(time.time() + 300 * 24 * 3600))
-                self.response.headers.add_header("Set-cookie", "user_id=%s; Path=/; Expires=%s"%(user_id, expires))
-            #Generate a user_id if not found in cookies
+                self.response.headers.add_header(
+                    "Set-cookie", "user_id=%s; Path=/; Expires=%s" % (user_id, expires))
+            # Generate a user_id if not found in cookies
             self.response.headers.add_header(
-                "Set-cookie", "groups=%s; Path=/"%(str(groups_selected)[1:-1]).replace(", ","|"))
+                "Set-cookie", "groups=%s; Path=/" % (str(groups_selected)[1:-1]).replace(", ", "|"))
             self.response.headers.add_header(
-                "Set-cookie", "order=%d; Path=/"%order)
+                "Set-cookie", "order=%d; Path=/" % order)
             if order:
-                self.response.headers.add_header("Set-cookie", "gseq=0; Path=/")
-                #Group Sequence
-                self.response.headers.add_header("Set-cookie", "qseq=0; Path=/")
-                #Question Sequence
-            #Record current gseq & qseq for ordered revision
+                self.response.headers.add_header(
+                    "Set-cookie", "gseq=0; Path=/")
+                # Group Sequence
+                self.response.headers.add_header(
+                    "Set-cookie", "qseq=0; Path=/")
+                # Question Sequence
+            # Record current gseq & qseq for ordered revision
             else:
                 self.response.headers.add_header(
                     "Set-cookie", "chosen=set(); Path=/")
                 self.response.headers.add_header("Set-cookie", "gseq=; Path=/")
                 self.response.headers.add_header("Set-cookie", "qseq=; Path=/")
-            #Record chosen (group, question) tuples for random revision
+            # Record chosen (group, question) tuples for random revision
             self.redirect("/review")
-            visitor_session = Visitor(user_id=int(user_id), ip=self.request.remote_addr, groups=groups_selected, order=order)
+            visitor_session = Visitor(
+                user_id=int(user_id), ip=self.request.remote_addr, groups=groups_selected, order=order)
             visitor_session.put()
         except:
             self.redirect("/")
 
 
 class Review(BaseHandler):
+
     def get_questions(self, name_en):
         """Given the English name of the group
         Return a list of questions from memcache or DB"""
         questions = memcache.get(name_en)
         if not questions:
-            questions = list(db.GqlQuery("select * from Question where group=:1 order by created asc", name_en))
+            questions = list(
+                db.GqlQuery("select * from Question where group=:1 order by created asc", name_en))
             memcache.set(name_en, questions)
         return questions
 
@@ -148,11 +157,13 @@ class Review(BaseHandler):
         self.response.headers.add_header("Set-cookie", "gseq=; Path=/")
         self.response.headers.add_header("Set-cookie", "qseq=; Path=/")
         self.response.headers.add_header("Set-cookie", "chosen=; Path=/")
-        self.render("finish.html",ip_warning=(self.request.remote_addr=="74.117.59.181"))
+        self.render("finish.html", ip_warning=(
+            self.request.remote_addr == "74.117.59.181"))
 
     def get(self):
         try:
-            groups = eval(("["+self.request.cookies.get("groups")+"]").replace("|",","))
+            groups = eval(
+                ("[" + self.request.cookies.get("groups") + "]").replace("|", ","))
             order = eval(self.request.cookies.get("order"))
             if order:
                 gseq = eval(self.request.cookies.get("gseq"))
@@ -161,38 +172,45 @@ class Review(BaseHandler):
                 if qseq == len(questions):
                     gseq += 1
                     qseq = 0
-                #Advance to next group
+                # Advance to next group
                 if gseq == len(groups):
                     self.finish()
                     return
-                self.render("review.html",ip_warning=(self.request.remote_addr=="74.117.59.181"), question=questions[qseq])
+                self.render("review.html", ip_warning=(
+                    self.request.remote_addr == "74.117.59.181"), question=questions[qseq])
             else:
                 all_questions = list(itertools.chain(
                     *[self.get_questions(group) for group in groups]))
-                chosen = eval(self.request.cookies.get("chosen").replace("|",","))
+                chosen = eval(
+                    self.request.cookies.get("chosen").replace("|", ","))
                 if len(chosen) == len(all_questions):
                     self.finish()
                     return
                 qseq_to_render = random.choice(
-                    list(set(range(len(all_questions)))-chosen))
-                self.render("review.html",ip_warning=(self.request.remote_addr=="74.117.59.181"),
-                            question=all_questions[qseq_to_render])
+                    list(set(range(len(all_questions))) - chosen))
+                self.render(
+                    "review.html", ip_warning=(self.request.remote_addr == "74.117.59.181"),
+                    question=all_questions[qseq_to_render])
                 chosen.add(qseq_to_render)
                 self.response.headers.add_header(
-                    "Set-cookie", "chosen=%s; Path=/"%("{"+str(chosen)[5:-2]+"}").replace(", ","|"))
-                #Avoid cookies with [] ,space or ','
+                    "Set-cookie", "chosen=%s; Path=/" % ("{" + str(chosen)[5:-2] + "}").replace(", ", "|"))
+                # Avoid cookies with [] ,space or ','
         except:
             self.redirect("/")
 
 
 class About(BaseHandler):
+
     def get(self):
-        self.render("about.html",ip_warning=(self.request.remote_addr=="74.117.59.181"))
+        self.render("about.html", ip_warning=(
+            self.request.remote_addr == "74.117.59.181"))
 
 
 class Feedback(BaseHandler):
+
     def get(self):
-        self.render("feedback.html",ip_warning=(self.request.remote_addr=="74.117.59.181"))
+        self.render("feedback.html", ip_warning=(
+            self.request.remote_addr == "74.117.59.181"))
 
     def post(self):
         feedback = self.request.get("feedback")
@@ -214,4 +232,4 @@ app = webapp2.WSGIApplication([
     ('/about', About),
     ('/feedback', Feedback),
     ('/add_data', AddData)
-    ], debug=True)
+], debug=True)
