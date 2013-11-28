@@ -53,10 +53,18 @@
         <form class="form-inline" method="post">
             <h2>{{question.title}}</h2>
             <div id="question"></div>
-            <script>document.getElementById("question").innerHTML=get_random_blanks("{{question.question}}");</script>
+            {%if question.q_class==0%}
+            <script>document.getElementById("question").innerHTML=get_blanks_random("{{question.question}}");</script>
+            {%elif question.q_class==1%}
+            <script>document.getElementById("question").innerHTML=get_blanks_strict("{{question.question}}",{{str(question.answer).replace("[u'","['").replace(" u'"," '")}})</script>
+            {%endif%}
             <br>
         </form>
-        <button class="btn btn-primary btn-lg" id="submit" onclick="check_answer('{{question.question}}')">提交</button>
+        {%if question.q_class==0%}
+        <button class="btn btn-primary btn-lg" id="submit" onclick="check_answer_random('{{question.question}}')">提交</button>
+        {%elif question.q_class==1%}
+        <button class="btn btn-primary btn-lg" id="submit" onclick="check_answer_strict({{str(question.answer).replace("[u'","['").replace(" u'"," '")}})")>提交</button>
+        {%endif%}
     </div>
 
 

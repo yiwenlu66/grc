@@ -31,11 +31,11 @@ class Question(db.Model):
     q_class = db.IntegerProperty(required=True)
     #Currently Supported:
     #    0 - Random Blanks
+    #    1 - Strict Blanks
     group = db.StringProperty(required=True)
     #Group name (in English), correspondent with the groups dictionary
     title = db.StringProperty(default=" ")
     question = db.TextProperty(required=True)
-    #In HTML Format
     answer = db.StringListProperty()
     #Not required for q_class 0 (in which answer is from the question)
     created = db.DateTimeProperty(auto_now_add=True)
