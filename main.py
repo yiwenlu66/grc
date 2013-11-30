@@ -172,6 +172,8 @@ class Review(BaseHandler):
                 if qseq == len(questions):
                     gseq += 1
                     qseq = 0
+                    self.response.headers.add_header("Set-cookie", "gseq=%s; Path=/"%gseq)
+                    self.response.headers.add_header("Set-cookie", "qseq=%s; Path=/"%qseq)
                 # Advance to next group
                 if gseq == len(groups):
                     self.finish()
