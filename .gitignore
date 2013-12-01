@@ -29,6 +29,9 @@ add_data*
 static/bs/*
 static/jquery-2.0.3.min.js
 
+#Auto-generated file
+index.yaml
+
 # Unit test / coverage reports
 .coverage
 .tox
