@@ -25,6 +25,10 @@ pip-log.txt
 #Script for updating data
 add_data.py
 
+#BS & JQuery
+static/bs/*
+static/jquery-2.0.3.min.js
+
 # Unit test / coverage reports
 .coverage
 .tox
