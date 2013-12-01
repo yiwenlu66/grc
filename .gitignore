@@ -23,7 +23,7 @@ __pycache__
 pip-log.txt
 
 #Script for updating data
-add_data.py
+add_data*
 
 #BS & JQuery
 static/bs/*
