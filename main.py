@@ -90,8 +90,9 @@ class Portal(BaseHandler):
 
     def get(self):
         self.init_groups()
-        self.render("portal.html", ip_warning=(self.request.remote_addr == "74.117.59.181"), groups=[item[1]
-                                                                                                     for item in self.groups_en_ch])
+        self.render("portal.html", ip_warning=False,
+                    #(self.request.remote_addr == "74.117.59.181"),
+                    groups=[item[1] for item in self.groups_en_ch])
         # Render Chinese names
 
     def post(self):
@@ -157,8 +158,8 @@ class Review(BaseHandler):
         self.response.headers.add_header("Set-cookie", "gseq=; Path=/")
         self.response.headers.add_header("Set-cookie", "qseq=; Path=/")
         self.response.headers.add_header("Set-cookie", "chosen=; Path=/")
-        self.render("finish.html", ip_warning=(
-            self.request.remote_addr == "74.117.59.181"))
+        self.render("finish.html", ip_warning=False)
+                    #(self.request.remote_addr == "74.117.59.181"))
 
     def get(self):
         try:
@@ -178,8 +179,9 @@ class Review(BaseHandler):
                 if gseq == len(groups):
                     self.finish()
                     return
-                self.render("review.html", ip_warning=(
-                    self.request.remote_addr == "74.117.59.181"), question=questions[qseq])
+                self.render("review.html", ip_warning=False
+                            #(self.request.remote_addr == "74.117.59.181")
+                            , question=questions[qseq])
             else:
                 all_questions = list(itertools.chain(
                     *[self.get_questions(group) for group in groups]))
@@ -191,7 +193,8 @@ class Review(BaseHandler):
                 qseq_to_render = random.choice(
                     list(set(range(len(all_questions))) - chosen))
                 self.render(
-                    "review.html", ip_warning=(self.request.remote_addr == "74.117.59.181"),
+                    "review.html", ip_warning=False,
+                    #(self.request.remote_addr == "74.117.59.181"),
                     question=all_questions[qseq_to_render])
                 chosen.add(qseq_to_render)
                 self.response.headers.add_header(
@@ -204,15 +207,15 @@ class Review(BaseHandler):
 class About(BaseHandler):
 
     def get(self):
-        self.render("about.html", ip_warning=(
-            self.request.remote_addr == "74.117.59.181"))
+        self.render("about.html", ip_warning=False)
+        #(self.request.remote_addr == "74.117.59.181"))
 
 
 class Feedback(BaseHandler):
 
     def get(self):
-        self.render("feedback.html", ip_warning=(
-            self.request.remote_addr == "74.117.59.181"))
+        self.render("feedback.html", ip_warning=False)
+#                    (self.request.remote_addr == "74.117.59.181"))
 
     def post(self):
         feedback = self.request.get("feedback")
